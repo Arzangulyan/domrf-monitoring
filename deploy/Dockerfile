@@ -54,6 +54,8 @@ ENV CHECK_INTERVAL="60"
 
 # Создание пользователя для безопасности
 RUN useradd --create-home --shell /bin/bash app && chown -R app:app /app
+# Копируем playwright данные в домашнюю директорию пользователя app
+RUN cp -r /root/.cache/ms-playwright /home/app/.cache/ && chown -R app:app /home/app/.cache/
 USER app
 
 # Healthcheck
