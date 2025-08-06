@@ -44,8 +44,8 @@ jobs:
             --restart unless-stopped \
             -e TG_TOKEN="${{ secrets.TG_TOKEN }}" \
             -e TG_CHAT_ID="${{ secrets.TG_CHAT_ID }}" \
-            -e MONITOR_MODE="${{ secrets.MONITOR_MODE }}" \
-            -e CHECK_INTERVAL="${{ secrets.CHECK_INTERVAL }}" \
+            -e MONITOR_MODE="${{ vars.MONITOR_MODE || 'all' }}" \
+            -e CHECK_INTERVAL="${{ vars.CHECK_INTERVAL || '60' }}" \
             domrf-monitor
           
           # Показать статус
