@@ -1,0 +1,53 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Deploy to server via SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          # Остановить и удалить старый контейнер
+          docker stop domrf-monitor || true
+          docker rm domrf-monitor || true
+          
+          # Создать директорию проекта
+          mkdir -p ~/domrf-monitoring
+          cd ~/domrf-monitoring
+          
+          # Клонировать или обновить репозиторий
+          if [ -d ".git" ]; then
+            git pull origin main
+          else
+            git clone https://github.com/${{ github.repository }} .
+          fi
+          
+          # Собрать новый образ
+          docker build -f deploy/Dockerfile -t domrf-monitor .
+          
+          # Запустить новый контейнер
+          docker run -d \
+            --name domrf-monitor \
+            --restart unless-stopped \
+            -e TG_TOKEN="${{ secrets.TG_TOKEN }}" \
+            -e TG_CHAT_ID="${{ secrets.TG_CHAT_ID }}" \
+            -e MONITOR_MODE="${{ secrets.MONITOR_MODE }}" \
+            -e CHECK_INTERVAL="${{ secrets.CHECK_INTERVAL }}" \
+            domrf-monitor
+          
+          # Показать статус
+          docker ps | grep domrf-monitor
+          echo "Deployment completed successfully!"

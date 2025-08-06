@@ -1,0 +1,13 @@
+[Unit]
+Description=Liner monitor bot
+After=network.target
+
+[Service]
+User=ubuntu
+Environment="TG_TOKEN=..." "TG_CHAT_ID=..."
+WorkingDirectory=/opt/liner
+ExecStart=/opt/liner/venv/bin/python bot_liner_monitor.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

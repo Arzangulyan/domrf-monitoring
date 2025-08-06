@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  domrf-monitor:
+    build: 
+      context: ..
+      dockerfile: deploy/Dockerfile
+    container_name: domrf-monitor
+    restart: unless-stopped
+    environment:
+      - TG_TOKEN=${TG_TOKEN}
+      - TG_CHAT_ID=${TG_CHAT_ID}
+      - MONITOR_MODE=${MONITOR_MODE:-all}
+      - CHECK_INTERVAL=${CHECK_INTERVAL:-60}
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('https://api.telegram.org', timeout=10)"]
+      interval: 5m
+      timeout: 30s
+      retries: 3
+      start_period: 1m
+
+volumes:
+  data:
